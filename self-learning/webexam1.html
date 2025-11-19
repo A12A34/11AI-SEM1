@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Web Exam 1</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body{
+            background-color: rgba(18, 37, 71, 1);
+            display: flex;
+            flex-flow: column nowrap;
+            justify-content: center;
+            align-items: center;
+        }
+        .container{
+            display: flex;
+            flex-flow: row nowrap;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(to right,rgba(0, 0, 0, 0.8), rgba(30, 62, 117, 1));
+            padding: 30px;
+            width: 60%;
+            height: 60vh;
+        }
+        .card{
+            width: 33%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 1);
+            padding: 10px;
+            display: flex;
+            flex-flow: column nowrap;
+            justify-content: flex-start;
+            align-items: center;
+            margin: 10px;
+        }
+        .card:nth-child(even){
+            background-color: rgba(255, 90, 200, 1);
+            color: white;
+        }
+        .card img{
+            border: solid 2px rgba(40, 76, 138, 1);
+            border-radius: 100%;
+            width: 200px;
+            height: 200px;
+            margin: 20px;
+        }
+        .yellow-text{
+            color: rgba(255, 204, 0, 1);
+        }
+        .large-text{
+            font-size: 100px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <img src="path/to/image1.jpg" alt="Image 1">
+            <h2>CODING</h2>
+            <p>This is the first card.</p>
+        </div>
+        <div class="card">
+            <img src="path/to/image2.jpg" alt="Image 2">
+            <h2>COOKING</h2>
+            <p>This is the second card.</p>
+        </div>
+        <div class="card">
+            <img src="path/to/image3.jpg" alt="Image 3">
+            <h2>CYCLING</h2>
+            <p>This is the third card.</p>
+        </div>
+    </div>
+    <h1 class="large-text"><span class="yellow-text">FLEXBOX</span>CSS</h1>
+</body>
+</html>

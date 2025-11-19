@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Exam 3</title>
+    <style>
+        *{
+            text-align: center;
+            box-sizing: border-box;
+            align-items: center;
+        }
+       body{display:flex;flex-flow:column nowrap;align-items:center;justify-content:center;height: 100vh;}
+       .card{
+        height: 200px;
+        width: 60%;
+        background-color: rgb(146, 250, 201);
+        border: 3px solid black;
+        border-radius: 20px;
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: center;
+        justify-content: center;
+       }
+       .card img{
+        width: 100%;
+        height: 140px;
+        display: block;
+       }
+       .card h2{
+        font-size: 1em;
+        color: #333;
+        margin: 10px 0;
+       }
+       .card p{
+        font-size: 1em;
+        color: #555;
+        margin: 10px 20px;
+       }
+       .card button{
+        font-size: 1em;
+        border: none;
+        border-radius: 5px;
+        background-color: gray;
+        color: white;
+        cursor: pointer;
+        width: 80%;
+        margin: 10px auto;
+        padding: 10px;
+        text-align: center;
+       }
+       .h2_img{
+        display: flex;
+        flex-flow: column nowrap;
+        align-items: center;
+        justify-content: center;
+        width: 40%;
+        height: 100%;
+       }
+       .taxt_buttons{
+        display: flex;
+        flex-flow: column nowrap;
+        justify-content: center;
+        align-items: center;
+        width: 60%;
+       }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="h2_img">
+            <h2>Welcome to Web Exam 4</h2>
+            <img src="https://via.placeholder.com/150" alt="Placeholder Image">
+        </div>
+        <div class="taxt_buttons">
+            <p>This is a sample text for Web Exam 4. Please proceed with the instructions provided.</p>
+            <button>Start Exam</button>
+        </div>
+    </div>
+</body>
+</html>
