@@ -1,6 +1,6 @@
 from pathlib import Path
 import tkinter
-path_output = Path("11AI/PL/W5/NV24214_W5_P2_output.txt")
+path_output = Path("PL\\W5\\NV24214_W5_P2_output.txt")
 if __name__ == "__main__":
     window = tkinter.Tk()
     def printheloow():
