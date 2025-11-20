@@ -1,21 +1,12 @@
 import tkinter
 from pathlib import Path
 import os
-from turtle import clear
+import csv
 path_output = Path("PL\\form.csv")
 bg = "gray"
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
-def display_data():
-    if path_output.exists():
-        with open(path_output, "r") as f:
-            data = f.read()
-            print("Current form data:")
-            for line in data.splitlines():
-                fn, ln, email, pas, pasc, phone = line.split(",")
-                print(f"First Name: {fn}, Last Name: {ln}, Email: {email}, Password: {pas}, Confirm Password: {pasc}, Phone Number: {phone}")
-    else:
-        print("No form data found.")
+
 def clear_data():
     if path_output.exists():
         with open(path_output, "w") as f:
@@ -27,15 +18,29 @@ if __name__ == "__main__":
     window.title("Form")
     window.geometry("1280x720")
     def save_form():
-        with open(path_output, "a") as f:
-            f.write(f"{fnentry.get()},{lnentry.get()},{eentry.get()},{pasentry.get()},{pascentr.get()},{pentry.get()}\n")
+        if path_output.exists():
+            if pasentry.get() != pascentr.get():
+                print("Passwords do not match.")
+                return
+            with open(path_output, "a", newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow([fnentry.get(), lnentry.get(), eentry.get(), pasentry.get(), pentry.get()])
         print("Form data saved to form.csv")
         print("First Name:", fnentry.get())
         print("Last Name:", lnentry.get())
         print("Email:", eentry.get())
-        print("Password:", pasentry.get())
-        print("Confirm Password:", pascentr.get())
+        print("Password:", "*" * len(pasentry.get()))
         print("Phone Number:", pentry.get())
+    def display_data():
+        if path_output.exists():
+            with open(path_output, "r", newline='',encoding="utf-8") as f:
+                reader = csv.reader(f)
+                print("Current form data:")
+                for row in reader:
+                    fn, ln, email, pas, phone = row
+                    tkinter.Label(window, text=f"First Name: {fn}| Last Name: {ln}| Email: {email}| Password: {'*' * len(pas)}| Phone Number: {phone}").pack()
+        else:
+            print("No form data found.")
     fnlabel = tkinter.Label(window, text="First Name:",width=50)
     fnlabel.pack()
     fnentry = tkinter.Entry(window, bg=bg, width=50)
