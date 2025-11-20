@@ -18,6 +18,6 @@ if __name__ == "__main__":
     label2.pack()
     window.mainloop()
     print("This is Ali Alhasan's first GUI program.")
-
+print("End of program.")
     
 #11AI Ali Alhasan NV24214 W5 P1
