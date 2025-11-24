@@ -1,0 +1,13 @@
+[
+    {
+        "id": "1",
+        "nv": "24214",
+        "class" : "AI",
+        "grade": "11",
+        "study-subjects": {
+            "subject-1": "Mathematics",
+            "subject-2": "Physics",
+            "subject-3": "Computer Science"
+        }
+    }
+]
