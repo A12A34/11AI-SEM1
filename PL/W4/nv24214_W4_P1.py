@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import csv
 
 FILE_NAME = "PL/W4/nv24214_DATA.csv"

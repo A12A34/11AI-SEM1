@@ -1,5 +1,8 @@
 import tkinter
 from pathlib import Path
+#!/usr/bin/env python3
+import tkinter
+from pathlib import Path
 import os
 import csv
 path_output = Path("PL\\form.csv")

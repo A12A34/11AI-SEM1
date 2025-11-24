@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import csv
 player_names = ["Alice", "Bob", "Charlie", "Diana", "Ethan"]
 games_played = [15, 22, 18, 30, 12]

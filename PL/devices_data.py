@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from ast import main
 import random
 import os

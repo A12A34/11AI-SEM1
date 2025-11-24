@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # 11AI Ali Alhasan
 from pathlib import Path
 import tkinter

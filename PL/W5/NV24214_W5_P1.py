@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 #11AI Ali Alhasan NV24214 W5 P1
 import tkinter
 def greet():

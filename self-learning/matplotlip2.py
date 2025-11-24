@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 #Three lines to make our compiler able to draw:
 import sys
 import matplotlib
