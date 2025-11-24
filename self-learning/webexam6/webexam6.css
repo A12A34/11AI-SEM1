@@ -1,0 +1,116 @@
+body {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: white;
+}
+
+.calc {
+    display: grid;
+    grid-template-areas:
+        "display display display display"
+        "btnClear btnDiv btnMul btnSub"
+        "btn7 btn8 btn9 btnAdd"
+        "btn4 btn5 btn6 btnEql"
+        "btn1 btn2 btn3 btnEql"
+        "btn0 btnDot btnEql btnEql";
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+    background-color: darkgrey;
+    border: 2px solid black;
+    border-radius: 10px;
+    padding: 10px;
+    width: 340px;
+    min-height: 60vh;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+}
+
+.display {
+    grid-area: display;
+    text-align: right;
+    border: 2px solid #333;
+    background: linear-gradient(90deg, #444, #888);
+    width: 100%;
+    height: 60px;
+    font-size: 32px;
+    padding: 10px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    color: #fff;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+}
+
+button {
+    font-size: 22px;
+    border: none;
+    border-radius: 6px;
+    background-color: #f0f0f0;
+    color: #222;
+    padding: 16px 0;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+button:hover {
+    background-color: #d1d1d1;
+    color: #000;
+}
+.btnOperator {
+    background-color: #6c63ff;
+    color: #fff;
+}
+.btnOperator:hover {
+    background-color: #5548c8;
+}
+.btnEqual {
+    background-color: #00c853;
+    color: #fff;
+    font-weight: bold;
+}
+.btnEqual:hover {
+    background-color: #009624;
+}
+.btnClear {
+    background-color: #ff5252;
+    color: #fff;
+    font-weight: bold;
+}
+.btnClear:hover {
+    background-color: #c62828;
+}
+
+/* Assign grid areas to button classes (keeps HTML clean) */
+.btnClear { grid-area: btnClear; }
+.btnDiv { grid-area: btnDiv; }
+.btnMul { grid-area: btnMul; }
+.btnSub { grid-area: btnSub; }
+.btn7 { grid-area: btn7; }
+.btn8 { grid-area: btn8; }
+.btn9 { grid-area: btn9; }
+.btnAdd { grid-area: btnAdd; }
+.btn4 { grid-area: btn4; }
+.btn5 { grid-area: btn5; }
+.btn6 { grid-area: btn6; }
+.btnEql { grid-area: btnEql; }
+.btn1 { grid-area: btn1; }
+.btn2 { grid-area: btn2; }
+.btn3 { grid-area: btn3; }
+.btn0 { grid-area: btn0; }
+.btnDot { grid-area: btnDot; }
+
+/* Responsive */
+@media (max-width: 480px) {
+    .calc { width: 95%; min-height: 50vh; padding: 8px; }
+    button { font-size: 18px; padding: 12px 0; }
+    .display { font-size: 24px; height: 50px; }
+}
+
+/* Accessibility: focus states */
+button:focus { outline: 3px solid rgba(108,99,255,0.35); box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+
+/* Make equal button span rows (bigger) */
+.btnEql { grid-row: 4 / 7; }
