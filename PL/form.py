@@ -1,5 +1,3 @@
-import tkinter
-from pathlib import Path
 #!/usr/bin/env python3
 import tkinter
 from pathlib import Path
@@ -13,7 +11,7 @@ def clear_screen():
 def clear_data():
     if path_output.exists():
         with open(path_output, "w") as f:
-            f.write("")
+            f.write("first_name,last_name,email,password,phone_number\n")
     else:
         print("No form data to clear.")
 if __name__ == "__main__":
@@ -39,9 +37,13 @@ if __name__ == "__main__":
             with open(path_output, "r", newline='',encoding="utf-8") as f:
                 reader = csv.reader(f)
                 print("Current form data:")
+                next(reader)  # Skip header row
+                tkinter.Label(window, text="|First Name|Last Name|Email|Password|Phone Number|").pack()
+                tkinter.Label(window, text=f"|{'-'*67}|").pack()
                 for row in reader:
                     fn, ln, email, pas, phone = row
-                    tkinter.Label(window, text=f"First Name: {fn}| Last Name: {ln}| Email: {email}| Password: {'*' * len(pas)}| Phone Number: {phone}").pack()
+                    tkinter.Label(window, text=f"|{fn:<20}|{ln:<20}|{email:<20}|{'*' * len(pas):<20}|{phone:<20}|").pack()
+                    tkinter.Label(window, text=f"|{'-'*67}|").pack()
         else:
             print("No form data found.")
     fnlabel = tkinter.Label(window, text="First Name:",width=50)
@@ -72,6 +74,6 @@ if __name__ == "__main__":
     sbutton.pack()
     showbutton = tkinter.Button(window, text="Show Data",bg="green", command=display_data)
     showbutton.pack()
-    cldtbutton = tkinter.Button(window, text="Clear Screen",bg="green", command=clear_data)
+    cldtbutton = tkinter.Button(window, text="Clear data",bg="green", command=clear_data)
     cldtbutton.pack()
     tkinter.mainloop()
