@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import csv
-
 FILE_NAME = "PL/W4/nv24214_DATA.csv"
 
 device_ids = ["AA52554", "AA53565", "AA54576", "AA55587", "AA56598"]
