@@ -5,29 +5,42 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Web Exam 6</title>
         <link rel="stylesheet" href="/self-learning/webexam6/webexam6.css">
+        <script src="/self-learning/webexam6/webexam6.js" defer></script>
     </head>
     <body>
-        <div class="calc" role="application" aria-label="Simple calculator">
-            <div class="display" id="display" aria-live="polite">0</div>
-            <button class="btnClear">C</button>
-            <button class="btnDiv btnOperator">/</button>
-            <button class="btnMul btnOperator">*</button>
-            <button class="btnSub btnOperator">-</button>
-            <button class="btn7 btnNumber">7</button>
-            <button class="btn8 btnNumber">8</button>
-            <button class="btn9 btnNumber">9</button>
-            <button class="btnAdd btnOperator">+</button>
-            <button class="btn4 btnNumber">4</button>
-            <button class="btn5 btnNumber">5</button>
-            <button class="btn6 btnNumber">6</button>
-            <button class="btnEql btnEqual">=</button>
-            <button class="btn1 btnNumber">1</button>
-            <button class="btn2 btnNumber">2</button>
-            <button class="btn3 btnNumber">3</button>
-            <button class="btn0 btnNumber">0</button>
-            <button class="btnDot btnDecimal">.</button>
-        </div>
-
-        <script src="/self-learning/webexam6/webexam6.js" defer></script>
+        <div class="calc">
+            <div class="display" role="region" aria-label="Calculator display">
+                        <p id="result" aria-live="polite"></p>
+                    </div>
+                <div id="calc_buttons">
+                <button class="btn operator" id="calc_clear" data-value="AC">AC</button>
+                <button class="btn" data-value="sin(">sin</button>
+                <button class="btn" data-value="cos(">cos</button>
+                <button class="btn" data-value="tan(">tan</button>
+                <button class="btn" data-value="sqrt(">√</button>
+                <button class="btn" data-value="7">7</button>
+                <button class="btn" data-value="8">8</button>
+                <button class="btn" data-value="9">9</button>
+                <button class="btn operator" data-value="/">/</button>
+                <button class="btn" data-value="4">4</button>
+                <button class="btn" data-value="5">5</button>
+                <button class="btn" data-value="6">6</button>
+                <button class="btn operator" data-value="*">*</button>
+                <button class="btn" data-value="1">1</button>
+                <button class="btn" data-value="2">2</button>
+                <button class="btn" data-value="3">3</button>
+                <button class="btn operator" data-value="-">-</button>
+                <button class="btn" data-value="0">0</button>
+                <button class="btn" data-value=".">.</button>
+                <button class="btn operator" id="equals" data-value="=">=</button>
+                <button class="btn operator" data-value="+">+</button>
+                <button class="btn" data-value="^">^</button>
+                <button class="btn" data-value="(">(</button>
+                <button class="btn" data-value=")">)</button>
+                <button class="btn" data-value="ln(">ln</button>
+                <button class="btn" data-value="pi">π</button>
+                <button class="btn" data-value="e">e</button>
+                <button class="btn" id="deg_toggle" data-value="deg">DEG</button>
+            </div>
     </body>
 </html>
