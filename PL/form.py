@@ -15,6 +15,7 @@ def clear_data():
     else:
         print("No form data to clear.")
 if __name__ == "__main__":
+    clear_screen()
     window = tkinter.Tk()
     window.title("Form")
     window.geometry("1280x720")
@@ -38,7 +39,7 @@ if __name__ == "__main__":
                 reader = csv.reader(f)
                 print("Current form data:")
                 next(reader)  # Skip header row
-                tkinter.Label(window, text="|First Name|Last Name|Email|Password|Phone Number|").pack()
+                tkinter.Label(window, text=f"|{"first name":<25}|{"last name":<25}|{"email":<25}|{"password":<25}|{"phone number":<25}|").pack()
                 tkinter.Label(window, text=f"|{'-'*67}|").pack()
                 for row in reader:
                     fn, ln, email, pas, phone = row
