@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Exam 7</title>
+    <style>
+        #container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+            border: 2px solid #000;
+            background-color: #f9f9f9;
+            display: grid;
+            grid-template: repeat(4, 1fr) / repeat(4, 1fr);
+            
+            grid-template-areas: "display display display display"
+                                 "one two three four"
+                                 "five six seven eight"
+                                 "nine equal minus plus";
+        }
+        #container div {
+            border: 1px solid #333;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.5em;
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to Web Exam 7</h1>
+    <div id="container">
+        <div style="grid-area: display;">Display Area</div>
+        <div style="grid-area: one">1</div>
+        <div style="grid-area: two">2</div>
+        <div style="grid-area: three">3</div>
+        <div style="grid-area: four">4</div>
+        <div style="grid-area: five">5</div>
+        <div style="grid-area: six">6</div>
+        <div style="grid-area: seven">7</div>
+        <div style="grid-area: eight">8</div>
+        <div style="grid-area: nine">9</div>
+        <div style="grid-area: equal">=</div>
+        <div style="grid-area: minus">-</div>
+        <div style="grid-area: plus">+</div>
+    </div>
+</body>
+</html>
