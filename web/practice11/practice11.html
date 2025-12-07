@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Practice 11</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            height: 100vh;
+            flex-flow: column wrap;
+            background-color: bisque;
+        }
+        #calc {
+            display: grid;
+            grid-template-areas:
+                "display display display display"
+                "nine eight seven divide"
+                "six five four multiply"
+                "three two one subtract"
+                "zero clear equals add";
+            background-color: darkgrey;
+            gap: 5px;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        #calc button {
+            font-size: 1.5em;
+            padding: 20px;
+            margin: 5px;
+            background-color: lightgrey;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #display {
+            grid-area: display;
+            font-size: 2em;
+            padding: 10px;
+            margin: 5px;
+            text-align: right;
+            background-color: white;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="calc">
+        <div id="display">0</div>
+        <button id="nine">9</button>
+        <button id="eight">8</button>
+        <button id="seven">7</button>
+        <button id="divide">/</button>
+        <button id="six">6</button>
+        <button id="five">5</button>
+        <button id="four">4</button>
+        <button id="multiply">*</button>
+        <button id="three">3</button>
+        <button id="two">2</button>
+        <button id="one">1</button>
+        <button id="subtract">-</button>
+        <button id="zero">0</button>
+        <button id="clear">C</button>
+        <button id="equals">=</button>
+        <button id="add">+</button>
+    </div>
+</body>
+</html>
