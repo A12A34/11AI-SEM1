@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    
+    <style>
+        body{
+            background-color: bisque;
+            display: flex;
+            flex-flow: column;
+            justify-content: flex-start;
+            align-items: center;
+            height: 100vh;
+        }
+        .container{
+            display: grid;
+            grid-template-areas:"a1 a2 a3 a3 a3 a6"
+                                "a1 b2 b3 b4 b5 b5"
+                                "a1 b2 c3 b4 c5 c5"
+                                "d1 d2 c3 d4 c5 c5"
+                                "e1 e1 e1 d4 e5 e6"
+                                "e1 e1 e1 f4 e5 f5"
+                                "e1 e1 e1 f4 g5 g5"
+                                "h1 h1 h3 h4 h5 h5"
+                                "j1 j3 j3 j4 j4 j5";
+            gap: 5px;
+            padding: 10px;
+            width: 100%; 
+            height: 100%;
+            border-radius: 10px;
+        }
+        .container div{
+            width: 100%;
+            height: 100%;
+            background-color: rgb(255, 72, 0);
+            border-radius: 10px;
+
+        }
+        .container div:nth-child(2n+1){
+            background-color: rgb(0, 243, 203);
+        }
+        .container div:nth-child(even){
+            background-color: rgb(93, 0, 243);
+        }
+        .container div:nth-child(3n){
+            background-color: rgb(243, 0, 34);
+        }
+        .container div:nth-child(4n){
+            background-color: rgb(0, 151, 63);
+        }
+        .container div:nth-child(6n){
+            background-color: rgb(243, 153, 0);
+        }
+        .container div:nth-child(9n){
+            background-color: rgb(243, 0, 140);
+        }
+        .container div:hover{
+            opacity: 0.8;
+            transform: translateY(-3px);
+            transition: all 0.3s ease-in-out;
+            z-index: 2;
+            scale: 1.02;
+        }
+    </style>
+    </head>
+    <body>
+        <div class="container">
+            <div style="grid-area: a1;"></div>
+            <div style="grid-area: a2;"></div>
+            <div style="grid-area: a3;"></div>
+            <div style="grid-area: a6;"></div>
+            <div style="grid-area: b2;"></div>
+            <div style="grid-area: b3;"></div>
+            <div style="grid-area: b4;"></div>
+            <div style="grid-area: b5;"></div>
+            <div style="grid-area: c3;"></div>
+            <div style="grid-area: c5;"></div>
+            <div style="grid-area: d1;"></div>
+            <div style="grid-area: d2;"></div>
+            <div style="grid-area: d4;"></div>
+            <div style="grid-area: e1;"></div>
+            <div style="grid-area: e5;"></div>
+            <div style="grid-area: e6;"></div>
+            <div style="grid-area: f4;"></div>
+            <div style="grid-area: f5;"></div>
+            <div style="grid-area: g5;"></div>
+            <div style="grid-area: h1;"></div>
+            <div style="grid-area: h3;"></div>
+            <div style="grid-area: h4;"></div>
+            <div style="grid-area: h5;"></div>
+            <div style="grid-area: j1;"></div>
+            <div style="grid-area: j3;"></div>
+            <div style="grid-area: j4;"></div>
+            <div style="grid-area: j5;"></div>
+        </div>
+    </body>
+</html>
