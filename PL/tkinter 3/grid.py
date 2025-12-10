@@ -2,6 +2,7 @@ import tkinter
 if __name__ == "__main__":
     window = tkinter.Tk()
     window.geometry("400x300")
+    window.configure(bg="red")
     lfname = tkinter.Label(window, text="First Name")
     lfname.grid(row=0, column=0)
     efname = tkinter.Entry(window)
