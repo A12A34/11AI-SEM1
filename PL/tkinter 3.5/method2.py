@@ -1,0 +1,18 @@
+import tkinter
+if __name__ == "__main__":
+    window = tkinter.Tk()
+    window.geometry("400x300")
+    window.configure(bg="lightblue")
+    frame = tkinter.Frame(window,bg="lightblue")
+    frame.pack()
+    lfname = tkinter.Label(frame, text="First Name", bg="lightblue", fg="#ff0000")
+    lfname.grid(row=0, column=0)
+    efname = tkinter.Entry(frame, bg="white",fg="#0000ff")
+    efname.grid(row=0, column=1)
+    llname = tkinter.Label(frame, text="Last Name", bg="lightblue", fg="#00ff00")
+    llname.grid(row=1, column=0)
+    elname = tkinter.Entry(frame, bg="white", fg="#ffffff")
+    elname.grid(row=1, column=1)
+    bsubmit = tkinter.Button(frame, text="Submit", bg="green", fg="#000000")
+    bsubmit.grid(row=2, column=0, columnspan=2, rowspan=2)
+    window.mainloop()

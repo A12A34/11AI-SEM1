@@ -1,80 +1,145 @@
-#!/usr/bin/env python3
-import tkinter
+﻿#!/usr/bin/env python3
+import tkinter as tk
+from tkinter import messagebox, font
 from pathlib import Path
 import os
 import csv
-path_output = Path("PL\\form.csv")
+
+# Store CSV next to this script (cross-platform)
+path_output = Path(__file__).parent / "form.csv"
 bg = "gray"
+
+def ensure_header():
+    if not path_output.exists():
+        path_output.parent.mkdir(parents=True, exist_ok=True)
+        with open(path_output, "w", newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(["first_name", "last_name", "email", "password", "phone_number"])
+
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def clear_data():
     if path_output.exists():
-        with open(path_output, "w") as f:
-            f.write("first_name,last_name,email,password,phone_number\n")
+        with open(path_output, "w", newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(["first_name", "last_name", "email", "password", "phone_number"])
+        messagebox.showinfo("Cleared", "Form data cleared.")
     else:
-        print("No form data to clear.")
+        messagebox.showinfo("No Data", "No form data to clear.")
+
+
 if __name__ == "__main__":
     clear_screen()
-    window = tkinter.Tk()
+    ensure_header()
+
+    window = tk.Tk()
     window.title("Form")
-    window.geometry("1280x720")
+    window.geometry("640x480")
+    lbl_width = 20
+    entry_width = 40
+
+    # Improve default font size
+    default_font = font.nametofont("TkDefaultFont")
+    default_font.configure(size=10)
+
     def save_form():
-        if path_output.exists():
-            if pasentry.get() != pascentr.get():
-                print("Passwords do not match.")
-                return
-            with open(path_output, "a", newline='') as f:
-                writer = csv.writer(f)
-                writer.writerow([fnentry.get(), lnentry.get(), eentry.get(), pasentry.get(), pentry.get()])
-        print("Form data saved to form.csv")
-        print("First Name:", fnentry.get())
-        print("Last Name:", lnentry.get())
-        print("Email:", eentry.get())
-        print("Password:", "*" * len(pasentry.get()))
-        print("Phone Number:", pentry.get())
+        fn = fnentry.get().strip()
+        ln = lnentry.get().strip()
+        email = eentry.get().strip()
+        pas = pasentry.get()
+        pasc = pascentr.get()
+        phone = pentry.get().strip()
+
+        if not fn or not ln or not email or not pas:
+            messagebox.showerror("Missing", "Please fill in all required fields.")
+            return
+        if pas != pasc:
+            messagebox.showerror("Password", "Passwords do not match.")
+            return
+
+        ensure_header()
+        with open(path_output, "a", newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow([fn, ln, email, pas, phone])
+
+        messagebox.showinfo("Saved", "Form data saved to form.csv")
+
     def display_data():
-        if path_output.exists():
-            with open(path_output, "r", newline='',encoding="utf-8") as f:
-                reader = csv.reader(f)
-                print("Current form data:")
-                next(reader)  # Skip header row
-                tkinter.Label(window, text=f"|{"first name":<25}|{"last name":<25}|{"email":<25}|{"password":<25}|{"phone number":<25}|").pack()
-                tkinter.Label(window, text=f"|{'-'*67}|").pack()
-                for row in reader:
-                    fn, ln, email, pas, phone = row
-                    tkinter.Label(window, text=f"|{fn:<20}|{ln:<20}|{email:<20}|{'*' * len(pas):<20}|{phone:<20}|").pack()
-                    tkinter.Label(window, text=f"|{'-'*67}|").pack()
-        else:
-            print("No form data found.")
-    fnlabel = tkinter.Label(window, text="First Name:",width=50)
+        if not path_output.exists():
+            messagebox.showinfo("No Data", "No form data found.")
+            return
+
+        # Show data in a separate window using a monospace Text widget for aligned columns
+        win = tk.Toplevel(window)
+        win.title("Stored Form Data")
+        txt = tk.Text(win, wrap='none', font=("Courier", 10))
+        txt.pack(fill='both', expand=True)
+
+        with open(path_output, "r", newline='', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            header = next(reader, None)
+            rows = list(reader)
+
+        cols = ["first name", "last name", "email", "password", "phone number"]
+        col_width = [25, 25, 30, 10, 15]
+        # header
+        sep = "+" + "+".join(["-" * w for w in col_width]) + "+\n"
+        header_line = "|" + "|".join([c.ljust(w) for c, w in zip(cols, col_width)]) + "|\n"
+        txt.insert("end", sep)
+        txt.insert("end", header_line)
+        txt.insert("end", sep)
+        for row in rows:
+            if len(row) < 5:
+                continue
+            fn, ln, email, pas, phone = row
+            masked = "*" * len(pas)
+            line = "|" + "|".join([
+                fn.ljust(col_width[0]),
+                ln.ljust(col_width[1]),
+                email.ljust(col_width[2]),
+                masked.ljust(col_width[3]),
+                phone.ljust(col_width[4])
+            ]) + "|\n"
+            txt.insert("end", line)
+        txt.insert("end", sep)
+        txt.config(state='disabled')
+
+    # Build form UI with consistent spacing
+    fnlabel = tk.Label(window, text="First Name:", width=lbl_width, anchor='w')
     fnlabel.pack()
-    fnentry = tkinter.Entry(window, bg=bg, width=50)
+    fnentry = tk.Entry(window, bg=bg, width=entry_width)
     fnentry.pack()
-    lnlabel = tkinter.Label(window, text="Last Name:",width=50)
+
+    lnlabel = tk.Label(window, text="Last Name:", width=lbl_width, anchor='w')
     lnlabel.pack()
-    lnentry = tkinter.Entry(window, bg=bg, width=50)
+    lnentry = tk.Entry(window, bg=bg, width=entry_width)
     lnentry.pack()
-    elabel = tkinter.Label(window, text="Email:",width=50)
+
+    elabel = tk.Label(window, text="Email:", width=lbl_width, anchor='w')
     elabel.pack()
-    eentry = tkinter.Entry(window, bg=bg, width=50)
+    eentry = tk.Entry(window, bg=bg, width=entry_width)
     eentry.pack()
-    paslabel = tkinter.Label(window, text="Password:",width=50)
+
+    paslabel = tk.Label(window, text="Password:", width=lbl_width, anchor='w')
     paslabel.pack()
-    pasentry = tkinter.Entry(window, bg=bg, width=50, show="*")
+    pasentry = tk.Entry(window, bg=bg, width=entry_width, show="*")
     pasentry.pack()
-    pasclabel = tkinter.Label(window, text="Confirm Password:",width=50)
+
+    pasclabel = tk.Label(window, text="Confirm Password:", width=lbl_width, anchor='w')
     pasclabel.pack()
-    pascentr = tkinter.Entry(window, bg=bg, width=50, show="*")
+    pascentr = tk.Entry(window, bg=bg, width=entry_width, show="*")
     pascentr.pack()
-    plabel = tkinter.Label(window, text="Phone Number:",width=50)
+
+    plabel = tk.Label(window, text="Phone Number:", width=lbl_width, anchor='w')
     plabel.pack()
-    pentry = tkinter.Entry(window, bg=bg, width=50)
+    pentry = tk.Entry(window, bg=bg, width=entry_width)
     pentry.pack()
-    sbutton = tkinter.Button(window, text="Submit",bg="green", command=save_form)
+    sbutton = tk.Button(window, text="Submit", bg="green", command=save_form, width=12)
     sbutton.pack()
-    showbutton = tkinter.Button(window, text="Show Data",bg="green", command=display_data)
+    showbutton = tk.Button(window, text="Show Data", bg="green", command=display_data, width=12)
     showbutton.pack()
-    cldtbutton = tkinter.Button(window, text="Clear data",bg="green", command=clear_data)
+    cldtbutton = tk.Button(window, text="Clear data", bg="green", command=clear_data, width=12)
     cldtbutton.pack()
-    tkinter.mainloop()
+
+    tk.mainloop()

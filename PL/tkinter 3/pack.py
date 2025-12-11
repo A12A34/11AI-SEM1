@@ -1,0 +1,15 @@
+import tkinter
+if __name__ == "__main__":
+    window = tkinter.Tk()
+    window.geometry("400x300")
+    lfname = tkinter.Label(window, text="First Name")
+    lfname.pack(side="right")
+    efname = tkinter.Entry(window)
+    efname.pack(side="right")
+    llname = tkinter.Label(window, text="Last Name")
+    llname.pack(side="left")
+    elname = tkinter.Entry(window)
+    elname.pack(side="left")
+    bsubmit = tkinter.Button(window, text="Submit")
+    bsubmit.pack(fill="x")
+    window.mainloop()
