@@ -1,0 +1,46 @@
+[
+    {
+        "device_id": "AA10001",
+        "device_name": "iPhone 14 Pro Max",
+        "category_id": "1",
+        "category": "phones",
+        "stock": 49,
+        "price": 500,
+        "used": 0,
+        "date_old": 0,
+        "camera_pixel": 48
+    },
+    {
+        "device_id": "AA10002",
+        "device_name": "Samsung Galaxy S23 Ultra",
+        "category_id": "1",
+        "category": "phones",
+        "stock": 30,
+        "price": 450,
+        "used": 0,
+        "date_old": 0,
+        "camera_pixel": 200
+    },
+    {
+        "device_id": "BB20001",
+        "device_name": "MacBook Pro 16",
+        "category_id": "2",
+        "category": "laptops",
+        "stock": 15,
+        "price": 1200,
+        "used": 0,
+        "date_old": 0,
+        "keyboard_language": "English"
+    },
+    {
+        "device_id": "BB20002",
+        "device_name": "Dell XPS 15",
+        "category_id": "2",
+        "category": "laptops",
+        "stock": 20,
+        "price": 1000,
+        "used": 0,
+        "date_old": 0,
+        "keyboard_language": "English"
+    }
+]
