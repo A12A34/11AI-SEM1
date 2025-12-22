@@ -11,5 +11,5 @@ if __name__ == "__main__":
     elname = tkinter.Entry(window)
     elname.pack(side="left")
     bsubmit = tkinter.Button(window, text="Submit")
-    bsubmit.pack(fill="x")
+    bsubmit.pack(fill="x", side="bottom")
     window.mainloop()
