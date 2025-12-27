@@ -1,1 +1,153 @@
-#!/usr/bin/env python3 """ Device Manager - Refactored CLI Author: NV24214 - Ali Mohammed """ from future import annotations import datetime as dt import json import random from dataclasses import dataclass, asdict from pathlib import Path from typing import List, Optional, Dict, Any, Tuple import logging import sys # ------------------------------ # Configuration & Paths # ------------------------------ APP_ROOT = Path.cwd() DATA_DIR = APP_ROOT / "data" LOG_DIR = APP_ROOT / "logs" DATA_DIR.mkdir(exist_ok=True) LOG_DIR.mkdir(exist_ok=True) DEFAULT_DATA_FILE = DATA_DIR / "devices.json" DEFAULT_LOG_FILE = LOG_DIR / "device_manager.log" TEXT_LOG_FILE = LOG_DIR / "device_logs.txt" # compatibility text log # Colors (kept for potential future GUI usage) BACKGROUND_COLOR = "#F0F0F0" TEXT_COLOR = "#333333" # ------------------------------ # Logging Setup # ------------------------------ logger = logging.getLogger("device_manager") logger.setLevel(logging.INFO) fmt = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s") fh = logging.FileHandler(DEFAULT_LOG_FILE, encoding="utf-8") fh.setFormatter(fmt) fh.setLevel(logging.INFO) logger.addHandler(fh) ch = logging.StreamHandler(sys.stdout) ch.setFormatter(fmt) ch.setLevel(logging.INFO) logger.addHandler(ch) def add_log(message: str) -> None: """Write a simple text log for compatibility with the original design.""" timestamp = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S") TEXT_LOG_FILE.parent.mkdir(exist_ok=True) with open(TEXT_LOG_FILE, "a", encoding="utf-8") as f: f.write(f"[{timestamp}] {message}\n") logger.info(message) def clear_logs() -> None: with open(TEXT_LOG_FILE, "w", encoding="utf-8") as f: f.write(f"Log cleared at {dt.datetime.now()}\n") logger.info("Logs cleared.") def show_logs() -> None: if not TEXT_LOG_FILE.exists(): print(f"No log file found at {TEXT_LOG_FILE}.") return print(f"\n--- Device Logs ({TEXT_LOG_FILE.name}) ---") with open(TEXT_LOG_FILE, "r", encoding="utf-8") as f: for line in f: print(line.rstrip()) print() # ------------------------------ # Domain Models # ------------------------------ @dataclass class Device: device_id: str device_name: str category_id: int category: str stock: int price: float used: bool date_old: int # days final_price: float = 0.0 def post_init(self) -> None: # Validation if self.stock < 0: raise ValueError("stock must be >= 0") if self.price < 0: raise ValueError("price must be >= 0") if self.date_old < 0: raise ValueError("date_old must be >= 0") # Initialize computed price self.calc_price() def calc_price(self) -> None: """Base device: no depreciation.""" self.final_price = float(self.price) def items_row(self) -> List[str]: return [ self.device_id, self.device_name, str(self.category_id), self.category, str(self.stock), f"{self.price:.2f}", "Yes" if self.used else "No", f"{self.date_old} days", ] @staticmethod def allowed_keys() -> set[str]: return {"device_id", "device_name", "category_id", "category", "stock", "price", "used", "date_old", "final_price"} @dataclass class Phone(Device): camera_pixel: int = 0 def post_init(self) -> None: super().post_init() if self.camera_pixel < 0: raise ValueError("camera_pixel must be >= 0") self.calc_price() def calc_price(self) -> None: if self.used: depreciation_pct = (self.date_old / 5.0) / 100.0 self.final_price = max(0.0, self.price * (1.0 - depreciation_pct)) else: self.final_price = float(self.price) def items_row(self) -> List[str]: base = super().items_row() base += [f"{self.camera_pixel} MP", f"{self.final_price:.2f}"] return base @staticmethod def allowed_keys() -> set[str]: return Device.allowed_keys() | {"camera_pixel"} @dataclass class Laptop(Device): keyboard_language: str = "" def post_init(self) -> None: super().post_init() self.calc_price() def calc_price(self) -> None: if self.used: depreciation_pct = (self.date_old / 10.0) / 100.0 self.final_price = max(0.0, self.price * (1.0 - depreciation_pct)) else: self.final_price = float(self.price) def items_row(self) -> List[str]: base = super().items_row() base += [self.keyboard_language, f"{self.final_price:.2f}"] return base @staticmethod def allowed_keys() -> set[str]: return Device.allowed_keys() | {"keyboard_language"} # ------------------------------ # Persistence & Utilities # ------------------------------ def generate_device_id(used_ids: set[str]) -> str: """Generate ID like AA12345 that is unique in used_ids.""" while True: new_id = f"AA{random.randint(10000, 99999)}" if new_id not in used_ids: add_log(f"Generated new device ID: {new_id}") return new_id def clean_dict(d: Dict[str, Any], allowed: set[str]) -> Dict[str, Any]: """Keep only allowed keys when loading JSON.""" return {k: d[k] for k in d if k in allowed} def format_table(rows: List[List[str]], header: List[str]) -> None: if not rows: print("[empty]") return rows_list = [list(map(str, r)) for r in rows] widths = [len(h) for h in header] for r in rows_list: for i, cell in enumerate(r): if i >= len(widths): widths.append(len(cell)) else: widths[i] = max(widths[i], len(cell)) fmt = " ".join(f"{{:<{w}}}" for w in widths) print(fmt.format(*header)) print("-" * (sum(widths) + 2 * (len(widths) - 1))) for r in rows_list: r = r + [""] * (len(widths) - len(r)) print(fmt.format(*r)) def input_nonempty(prompt: str, maxlen: Optional[int] = None) -> str: while True: s = input(prompt).strip() if not s: print("This field cannot be empty.") continue if maxlen is not None and len(s) > maxlen: print(f"Value is too long (max {maxlen}).") continue return s def input_int(prompt: str, min_value: Optional[int] = None, max_value: Optional[int] = None) -> int: while True: s = input(prompt).strip() try: n = int(s) if (min_value is not None and n < min_value) or (max_value is not None and n > max_value): print(f"Please enter a whole number in range [{min_value or '-inf'}, {max_value or 'inf'}].") continue return n except ValueError: print("Please enter a valid whole number.") def input_float(prompt: str, min_value: Optional[float] = None, max_value: Optional[float] = None) -> float: while True: s = input(prompt).strip() try: x = float(s) if (min_value is not None and x < min_value) or (max_value is not None and x > max_value): print(f"Please enter a number in range [{min_value or '-inf'}, {max_value or 'inf'}].") continue return x except ValueError: print("Please enter a valid number.") def input_yes_no(prompt: str) -> bool: while True: s = input(prompt + " [Y/N]: ").strip().upper() if s in ("Y", "YES"): return True if s in ("N", "NO"): return False print("Please enter Y or N.") # ------------------------------ # Manager # ------------------------------ class DeviceManager: def init(self) -> None: self.phones: List[Phone] = [] self.laptops: List[Laptop] = [] # seed with your initial sample data self._seed() def _seed(self) -> None: self.phones = [ Phone("AA52554", "iPhone 11", 1, "Phone", 45, 200, True, 150, 48), Phone("AA53565", "iPhone 12", 1, "Phone", 65, 200, True, 120, 36), Phone("AA54576", "iPhone 13", 1, "Phone", 25, 200, False, 30, 64), Phone("AA55587", "iPhone 14", 1, "Phone", 15, 200, False, 10, 108), Phone("AA56598", "iPhone 15", 1, "Phone", 5, 200, False, 5, 200), Phone("AA57599", "Samsung S22", 1, "Phone", 40, 180, True, 60, 50), Phone("AA58600", "Samsung S23", 1, "Phone", 20, 250, False, 15, 200), Phone("AA59601", "Google Pixel 7", 1, "Phone", 30, 220, True, 40, 64), Phone("AA60602", "OnePlus 11", 1, "Phone", 18, 210, False, 12, 108), Phone("AA61603", "Xiaomi 13 Pro", 1, "Phone", 10, 190, False, 8, 200), ] self.laptops = [ Laptop("AA80252", "Dell Pro 10", 2, "Laptop", 36, 150, False, 0, "En"), Laptop("AA20053", "Dell Pro 12", 2, "Laptop", 83, 150, True, 40, "En"), Laptop("AA30054", "Dell Pro 14", 2, "Laptop", 12, 150, True, 90, "En"), Laptop("AA40055", "Dell Pro 16", 2, "Laptop", 23, 150, True, 120, "En"), Laptop("AA50056", "Dell Pro 18", 2, "Laptop", 8, 150, False, 20, "En"), Laptop("AA60057", "HP EliteBook 840", 2, "Laptop", 40, 200, True, 60, "En"), Laptop("AA70058", "HP Spectre x360", 2, "Laptop", 25, 250, False, 10, "En"), Laptop("AA80059", "Lenovo ThinkPad X1", 2, "Laptop", 15, 220, True, 45, "En"), Laptop("AA90060", "Asus ZenBook Pro", 2, "Laptop", 10, 230, False, 5, "En"), Laptop("AA10061", "Apple MacBook Air M2", 2, "Laptop", 7, 350, False, 3, "En"), ] # ---------- Core operations ---------- def all_devices(self) -> List[Device]: return [*self.phones, *self.laptops] def find_device_by_id(self, dev_id: str) -> Optional[Device]: for d in self.all_devices(): if d.device_id == dev_id: return d return None def view_devices(self) -> None: for d in self.all_devices(): d.calc_price() phone_header = ["Device ID", "Name", "CatID", "Category", "Stock", "Price", "Used", "Age", "Camera (MP)", "Final Price"] laptop_header = ["Device ID", "Name", "CatID", "Category", "Stock", "Price", "Used", "Age", "Keyboard", "Final Price"] print("\n--- Phones ---") format_table([p.items_row() for p in self.phones], phone_header) print("\n--- Laptops ---") format_table([l.items_row() for l in self.laptops], laptop_header) print() def add_device(self) -> None: all_ids = {d.device_id for d in self.all_devices()} print("1. Phone") print("2. Laptop") choice = input_nonempty("Enter choice (1/2): ", maxlen=1) if choice == "1": device_id = generate_device_id(all_ids) device_name = input_nonempty("Enter Device Name: ", maxlen=100) stock = input_int("Enter Stock (integer >=0): ", min_value=0) price = input_float("Enter Price: ", min_value=0.0) used = input_yes_no("Is it used?") date_old = input_int("Enter how many days old: ", min_value=0) camera_pixel = input_int("Enter Camera Pixel (MP): ", min_value=0) p1 = Phone(device_id, device_name, 1, "Phone", stock, price, used, date_old, camera_pixel) self.phones.append(p1) print(f"Phone added with ID {device_id} at {dt.datetime.now()}.") add_log(f"Added phone {device_name} (ID {device_id})") elif choice == "2": device_id = generate_device_id(all_ids) device_name = input_nonempty("Enter Device Name: ", maxlen=100) stock = input_int("Enter Stock (integer >=0): ", min_value=0) price = input_float("Enter Price: ", min_value=0.0) used = input_yes_no("Is it used?") date_old = input_int("Enter how many days old: ", min_value=0) keyboard_language = input_nonempty("Enter Keyboard Language: ", maxlen=10) l1 = Laptop(device_id, device_name, 2, "Laptop", stock, price, used, date_old, keyboard_language) self.laptops.append(l1) print(f"Laptop added with ID {device_id} at {dt.datetime.now()}.") add_log(f"Added laptop {device_name} (ID {device_id})") else: print("Invalid choice.") def buy_device(self) -> None: self.view_devices() dev_id = input_nonempty("Enter Device ID to buy: ") qty = input_int("Enter quantity to buy: ", min_value=1) d = self.find_device_by_id(dev_id) if not d: print("Device not found.") return if d.stock >= qty: d.stock -= qty d.calc_price() print(f"Purchased {qty} of {d.device_name} at {d.final_price:.2f} each. Remaining stock: {d.stock} at {dt.datetime.now()}.") add_log(f"Purchased {qty} of {d.device_name} (ID: {dev_id}) at {d.final_price:.2f} each. Remaining stock: {d.stock}") else: print("Not enough stock.") def search_device(self) -> None: term = input_nonempty("Enter Device ID or Name to search: ").lower() found_rows = [] for d in self.all_devices(): if d.device_id.lower() == term or d.device_name.lower() == term: d.calc_price() if isinstance(d, Phone): found_rows.append(d.items_row()) elif isinstance(d, Laptop): found_rows.append(d.items_row()) if found_rows: header = ["Device ID", "Name", "CatID", "Category", "Stock", "Price", "Used", "Age"] # Add type-specific cols if present for row in found_rows: if len(row) == 10: # phone row header = ["Device ID", "Name", "CatID", "Category", "Stock", "Price", "Used", "Age", "Camera (MP)", "Final Price"] break if len(row) == 10: # laptop row header = ["Device ID", "Name", "CatID", "Category", "Stock", "Price", "Used", "Age", "Keyboard", "Final Price"] break format_table(found_rows, header) else: print("No device found.") def delete_device(self) -> None: self.view_devices() dev_id = input_nonempty("Enter Device ID to delete: ") for collection in (self.phones, self.laptops): for idx, d in enumerate(collection): if d.device_id == dev_id: del collection[idx] print(f"Device {dev_id} removed at {dt.datetime.now()}.") add_log(f"Deleted device with ID {dev_id}") return print("Device not found.") def min_price(self) -> None: devices = self.all_devices() if not devices: print("No devices.") return for d in devices: d.calc_price() cheapest = min(devices, key=lambda x: x.final_price) print(f"Cheapest: {cheapest.device_name} (ID: {cheapest.device_id}) at {cheapest.final_price:.2f}") def max_price(self) -> None: devices = self.all_devices() if not devices: print("No devices.") return for d in devices: d.calc_price() most_expensive = max(devices, key=lambda x: x.final_price) print(f"Most Expensive: {most_expensive.device_name} (ID: {most_expensive.device_id}) at {most_expensive.final_price:.2f}") def filter_devices(self) -> None: print("1. Phone") print("2. Laptop") i2 = input_nonempty("Enter choice (1/2): ", maxlen=1) if i2 == "1": for p in self.phones: p.calc_price() header = ["Device ID", "Name", "CatID", "Category", "Stock", "Price", "Used", "Age", "Camera (MP)", "Final Price"] print("Filter by:") print("1. name") print("2. price (<=)") print("3. stock (>=)") print("4. used (Y/N)") print("5. age (<= days)") print("6. camera_pixel (>= MP)") i3 = input_nonempty("Enter choice (1-6): ", maxlen=1) rows: List[List[str]] = [] if i3 == "1": name = input_nonempty("Enter name to filter: ").lower() rows = [p.items_row() for p in self.phones if p.device_name.lower() == name] elif i3 == "2": price = input_float("Enter maximum price: ", min_value=0.0) rows = [p.items_row() for p in self.phones if p.final_price <= price] elif i3 == "3": stock = input_int("Enter minimum stock: ", min_value=0) rows = [p.items_row() for p in self.phones if p.stock >= stock] elif i3 == "4": used = input_yes_no("Filter used? (Y for used, N for new): ") rows = [p.items_row() for p in self.phones if p.used == used] elif i3 == "5": days = input_int("Enter maximum age in days: ", min_value=0) rows = [p.items_row() for p in self.phones if p.date_old <= days] elif i3 == "6": mp = input_int("Enter minimum camera pixel: ", min_value=0) rows = [p.items_row() for p in self.phones if p.camera_pixel >= mp] else: print("Invalid choice.") return format_table(rows, header) elif i2 == "2": for l in self.laptops: l.calc_price() header = ["Device ID", "Name", "CatID", "Category", "Stock", "Price", "Used", "Age", "Keyboard", "Final Price"] print("Filter by:") print("1. name") print("2. price (<=)") print("3. stock (>=)") print("4. used (Y/N)") print("5. age (<= days)") print("6. keyboard_language") i3 = input_nonempty("Enter choice (1-6): ", maxlen=1) rows: List[List[str]] = [] if i3 == "1": name = input_nonempty("Enter name to filter: ").lower() rows = [l.items_row() for l in self.laptops if l.device_name.lower() == name] elif i3 == "2": price = input_float("Enter maximum price: ", min_value=0.0) rows = [l.items_row() for l in self.laptops if l.final_price <= price] elif i3 == "3": stock = input_int("Enter minimum stock: ", min_value=0) rows = [l.items_row() for l in self.laptops if l.stock >= stock] elif i3 == "4": used = input_yes_no("Filter used? (Y for used, N for new): ") rows = [l.items_row() for l in self.laptops if l.used == used] elif i3 == "5": days = input_int("Enter maximum age in days: ", min_value=0) rows = [l.items_row() for l in self.laptops if l.date_old <= days] elif i3 == "6": lang = input_nonempty("Enter keyboard language to filter: ").lower() rows = [l.items_row() for l in self.laptops if l.keyboard_language.lower() == lang] else: print("Invalid choice.") return format_table(rows, header) else: print("Invalid choice.") def edit_device(self) -> None: self.view_devices() dev_id = input_nonempty("Enter Device ID to edit: ") d = self.find_device_by_id(dev_id) if not d: print("Device not found.") return print("Editing device. Press enter to keep current value.") new_name = input(f"Current Name ({d.device_name}): ").strip() or d.device_name def parse_int(prompt: str, current: int) -> int: s = input(prompt).strip() return current if s == "" else int(s) def parse_float(prompt: str, current: float) -> float: s = input(prompt).strip() return current if s == "" else float(s) try: new_stock = parse_int(f"Current Stock ({d.stock}): ", d.stock) new_price = parse_float(f"Current Price ({d.price}): ", d.price) new_used_raw = input(f"Is it used (Y/N) ({'Y' if d.used else 'N'}): ").strip().upper() new_used = d.used if new_used_raw == "" else (new_used_raw in ("Y", "YES")) new_date_old = parse_int(f"Current Age in days ({d.date_old}): ", d.date_old) except ValueError: print("Invalid input. Aborting edit.") return d.device_name = new_name d.stock = new_stock d.price = new_price d.used = new_used d.date_old = new_date_old if isinstance(d, Phone): s = input(f"Current Camera Pixel ({d.camera_pixel}): ").strip() if s: try: d.camera_pixel = int(s) except ValueError: print("Invalid camera pixel. Keeping old value.") elif isinstance(d, Laptop): s = input(f"Current Keyboard Language ({d.keyboard_language}): ").strip() if s: d.keyboard_language = s d.calc_price() print(f"Device updated at {dt.datetime.now()}.") add_log(f"Updated device with ID {dev_id}") def points_devices(self, inid: str) -> None: devices = self.all_devices() if not devices: print("No devices available.") return for d in devices: d.calc_price() avg_price = sum(d.final_price for d in devices) / len(devices) phone_camera_values = [p.camera_pixel for p in self.phones] or [1] # avoid div by zero avg_camera = sum(phone_camera_values) / len(phone_camera_values) d = self.find_device_by_id(inid) if not d: print("Device not found.") return price_point = d.final_price / avg_price if avg_price else 0 camera_point = (d.camera_pixel / avg_camera) if isinstance(d, Phone) and avg_camera else 0 total_points = price_point + camera_point print(f"Points for Device ID {inid}:") print(f"Price Point: {price_point:.2f}") print(f"Camera Point: {camera_point:.2f}") print(f"Total Points: {total_points:.2f}") def show_analytics(self) -> None: self.view_devices() inid = input_nonempty("Enter Device ID to show analytics: ") d = self.find_device_by_id(inid) if not d: print("Device not found.") return print(f"\nAnalytics for Device ID {inid}:") print(f"Name: {d.device_name}") print(f"Category: {d.category}") print(f"Stock: {d.stock}") print(f"Price: {d.price:.2f}") print(f"Used: {'Yes' if d.used else 'No'}") print(f"Age: {d.date_old} days") self.points_devices(inid) def show_stats(self) -> None: devices = self.all_devices() if not devices: print("No devices available.") return prices = sorted(d.final_price for d in devices) stocks = sorted(d.stock for d in devices) ages = sorted(d.date_old for d in devices) def mean(xs: List[float]) -> float: return (sum(xs) / len(xs)) if xs else 0.0 def median(xs: List[float]) -> float: n = len(xs) if n == 0: return 0.0 mid = n // 2 if n % 2 == 1: return float(xs[mid]) return (xs[mid - 1] + xs[mid]) / 2.0 def ptp(xs: List[float]) -> float: return (max(xs) - min(xs)) if xs else 0.0 def std(xs: List[float]) -> float: m = mean(xs) return (sum((x - m) ** 2 for x in xs) / len(xs)) ** 0.5 if xs else 0.0 print("\nDevice Statistics:") print(f"Average Price: {mean(prices):.2f}") print(f"Median Price: {median(prices):.2f}") print(f"Price Range: {ptp(prices):.2f}") print(f"Price Std Dev: {std(prices):.2f}") print(f"Average Stock: {mean(stocks):.2f}") print(f"Median Stock: {median(stocks):.2f}") print(f"Stock Range: {ptp(stocks):.2f}") print(f"Stock Std Dev: {std(stocks):.2f}") print(f"Average Age (days): {mean(ages):.2f}") print(f"Median Age (days): {median(ages):.2f}") print(f"Age Range (days): {ptp(ages):.2f}") print(f"Age Std Dev (days): {std(ages):.2f}") # ---------- Persistence ---------- def save_data(self, filepath: Optional[Path] = None) -> Path: path = filepath or DEFAULT_DATA_FILE payload = { "schema_version": 1, "saved_at": dt.datetime.now().isoformat(), "phones": [asdict(p) for p in self.phones], "laptops": [asdict(l) for l in self.laptops], } path.parent.mkdir(exist_ok=True) with open(path, "w", encoding="utf-8") as f: json.dump(payload, f, indent=2) print(f"Data saved to {path} at {dt.datetime.now()}") add_log(f"Data saved to {path}") return path def load_data(self, filepath: Optional[Path] = None) -> Tuple[List[Phone], List[Laptop]]: path = filepath or DEFAULT_DATA_FILE if not path.exists(): print(f"No file found at {path}.") return [], [] with open(path, "r", encoding="utf-8") as f: data = json.load(f) # Sanitize and rebuild objects self.phones = [Phone(**clean_dict(p, Phone.allowed_keys())) for p in data.get("phones", [])] self.laptops = [Laptop(**clean_dict(l, Laptop.allowed_keys())) for l in data.get("laptops", [])] print(f"Data loaded from {path} at {dt.datetime.now()}") add_log(f"Data loaded from {path}") return self.phones, self.laptops def display_json(self) -> None: full_path = input_nonempty("Enter full path to JSON file: ") path = Path(full_path) if not path.exists(): print(f"No file found at {path}.") return with open(path, "r", encoding="utf-8") as f: data = json.load(f) print(json.dumps(data, indent=2)) input("Press Enter to continue...") # ------------------------------ # Menus # ------------------------------ def manage_data_menu(dm: DeviceManager) -> None: print("\n=== Data Management ===") print("1. Save data") print("2. Load data") print("3. Show logs") print("4. Clear logs") print("5. Display JSON file") choice = input_nonempty("Enter choice (1-5): ", maxlen=1) if choice == "1": filename = input_nonempty("Enter filename (without extension): ") dm.save_data(DATA_DIR / f"{filename}.json") elif choice == "2": full = input_nonempty("Enter file path to load data: ") dm.load_data(Path(full)) elif choice == "3": show_logs() elif choice == "4": clear_logs() elif choice == "5": dm.display_json() else: print("Invalid choice.") def main_menu() -> None: dm = DeviceManager() while True: print("\n=== Device Management Menu ===") print("1. View all devices") print("2. Add device") print("3. Buy device") print("4. Search device") print("5. Delete device") print("6. Show cheapest device") print("7. Show most expensive device") print("8. Filter devices") print("9. Edit device") print("10. Show device analytics") print("11. Show statistics") print("12. Manage data (Save/Load/Logs/Display)") print("15. Exit") choice = input_nonempty("Enter your choice: ", maxlen=2) if choice == "1": dm.view_devices() elif choice == "2": dm.add_device() elif choice == "3": dm.buy_device() elif choice == "4": dm.search_device() elif choice == "5": dm.delete_device() elif choice == "6": dm.min_price() elif choice == "7": dm.max_price() elif choice == "8": dm.filter_devices() elif choice == "9": dm.edit_device() elif choice == "10": dm.show_analytics() elif choice == "11": dm.show_stats() elif choice == "12": manage_data_menu(dm) elif choice == "15": print("Exiting...") break else: print("Invalid choice.") input("Press Enter to continue...") # ------------------------------ # Entry Point # ------------------------------ if name == "main": main_menu()
+import os
+import tkinter as tk
+import json
+from pathlib import Path
+
+BASE_DIR = Path(os.getcwd())
+devices_file = Path("C:\\Users\\PC\\.vscode\\repos\\11AI\\PL\\devices_final\\devices_data.json") if os.name == "nt" else Path(BASE_DIR / "devices_data.json")
+
+def enter_boolen_check(entry_name, prompt, option):
+    for widget in frame_top.winfo_children():
+        widget.destroy()
+    get_input = entry_name.get().strip().lower()
+    if option != get_input:
+        label = tk.Label(frame_top, text=prompt)
+        label.grid(row=0, column=0, sticky="w")
+
+def enter_number_check(entry_name, prompt, min_value, max_value):
+    for widget in frame_top.winfo_children():
+        widget.destroy()
+    get_input = entry_name.get().strip()
+    if not get_input.isdigit() or not (min_value <= int(get_input) <= max_value):
+        label = tk.Label(frame_top, text=prompt)
+        label.grid(row=0, column=0, sticky="w")
+
+def entry_string_check(entry_name, prompt, min_length, max_length):
+    for widget in frame_top.winfo_children():
+        widget.destroy()
+    get_input = entry_name.get().strip()
+    if not (min_length <= len(get_input) <= max_length):
+        label = tk.Label(frame_top, text=prompt)
+        label.grid(row=0, column=0, sticky="w")
+
+def load_devices_data():
+    if os.path.exists(devices_file):
+        with open(devices_file, "r", encoding="utf-8") as file:
+            return json.load(file)
+    return []
+
+def add_device_data(device):
+    devices_data = load_devices_data()
+    devices_data.append(device)
+    with open(devices_file, "w", encoding="utf-8") as file:
+        json.dump(devices_data, file, indent=4)
+
+def show_devices():
+    for widget in frame_right.winfo_children():
+        widget.destroy()
+
+    devices_data = load_devices_data()
+
+    if devices_data:
+        label_row = 0
+        for device in devices_data:
+            label_column = 0
+            for key, value in device.items():
+                label = tk.Label(frame_right, text="|")
+                label.grid(row=label_row, column=label_column, sticky="nsew")
+
+                button = tk.Button(frame_right, text=f"{key}: {value}")
+                button.grid(row=label_row, column=label_column + 1, sticky="nsew")
+
+                frame_right.grid_columnconfigure(label_column, weight=0)
+                frame_right.grid_columnconfigure(label_column + 1, weight=1)
+
+                label_column += 2
+            frame_right.grid_rowconfigure(label_row, weight=0)
+            label_row += 1
+
+def create_device():
+    for widget in frame_right.winfo_children():
+        widget.destroy()
+
+    devices_data = load_devices_data()
+    entry_row = 0
+
+    for data in devices_data:
+        for key, value in data.items():
+            label = tk.Label(frame_right, text=key)
+            entry = tk.Entry(frame_right)
+
+            label.grid(row=entry_row, column=0, sticky="e")
+            entry.grid(row=entry_row, column=1, sticky="nsew")
+
+            frame_right.grid_columnconfigure(1, weight=1)
+            entry_row += 1
+
+        def collect_device_data():
+            device = {}
+            for i, (key, _) in enumerate(data.items()):
+                entry_widget = frame_right.grid_slaves(row=i, column=1)[0]
+                device[key] = entry_widget.get().strip()
+            add_device_data(device)
+
+        button = tk.Button(frame_right, text="Submit", command=collect_device_data)
+        button.grid(row=entry_row, column=0, columnspan=2, sticky="nsew")
+        break
+
+def delete_device():
+    for widget in frame_right.winfo_children():
+        widget.destroy()
+
+    label = tk.Label(frame_right, text="Enter Device ID:")
+    label.grid(row=0, column=0, sticky="e")
+
+    entry = tk.Entry(frame_right)
+    entry.grid(row=0, column=1, sticky="nsew")
+
+    frame_right.grid_columnconfigure(1, weight=1)
+
+    def confirm_delete():
+        devices_data = load_devices_data()
+        device_id = entry.get().strip()
+        for i, device in enumerate(devices_data):
+            if device.get("device_id") == device_id:
+                devices_data.pop(i)
+                save_data(devices_data)
+                return
+
+    button = tk.Button(frame_right, text="Delete", command=confirm_delete)
+    button.grid(row=1, column=0, columnspan=2, sticky="nsew")
+
+def save_data(data):
+    for widget in frame_right.winfo_children():
+        widget.destroy()
+    with open(devices_file, "w", encoding="utf-8") as file:
+        json.dump(data, file, indent=4)
+
+def main_menu():
+    button_show_devices = tk.Button(frame_left, text="Show Devices", command=show_devices)
+    button_create_device = tk.Button(frame_left, text="Create Device", command=create_device)
+    button_delete_device = tk.Button(frame_left, text="Delete Device", command=delete_device)
+
+    button_show_devices.grid(row=0, column=0, sticky="nsew")
+    button_create_device.grid(row=1, column=0, sticky="nsew")
+    button_delete_device.grid(row=2, column=0, sticky="nsew")
+
+    frame_left.grid_columnconfigure(0, weight=1)
+
+if __name__ == "__main__":
+    window = tk.Tk()
+    window.title("Devices Final")
+    window.geometry("800x600")
+
+    frame_left = tk.Frame(window)
+    frame_right = tk.Frame(window)
+    frame_top = tk.Frame(window)
+
+    frame_left.pack(side=tk.LEFT, fill=tk.Y)
+    frame_right.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+    frame_top.pack(side=tk.TOP, fill=tk.X)
+
+    main_menu()
+    window.mainloop()

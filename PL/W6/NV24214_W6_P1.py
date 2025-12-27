@@ -1,7 +1,6 @@
 #11AI Ali Alhasan Nv24214 W6 P1
 
 import tkinter as tk
-from turtle import pen
 if __name__ == "__main__":
     def calculate_total_price():
         price = int(pentry.get())
