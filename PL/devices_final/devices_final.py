@@ -48,31 +48,36 @@ def show_devices():
 
 # --------------------- CREATE DEVICE ---------------------
 def create_device():
+    global fields, entries
     clear_frame(frame_right)
 
-    DEVICE_FIELDS = ["device_id", "name", "type", "price"]
-    entries = {}
+    data = load_devices_data()
+    if not data:
+        return
 
-    for row, field in enumerate(DEVICE_FIELDS):
-        tk.Label(frame_right, text=field).grid(row=row, column=0, sticky="nsew", padx=5)
+    fields = list(data[0].keys())
+    entries = []
+
+    for row, field in enumerate(fields):
+        label = tk.Label(frame_right, text=f"{field}:")
+        label.grid(row=row, column=0, sticky="w")
+
         entry = tk.Entry(frame_right)
-        entry.grid(row=row, column=1, sticky="nsew", padx=5)
-        entries[field] = entry
+        entry.grid(row=row, column=1, sticky="ew")
+        entries.append(entry)
+
+    submit_button = tk.Button(frame_right, text="Submit", command=submit)
+    submit_button.grid(row=len(fields), column=0, columnspan=2, sticky="ew")
 
     frame_right.grid_columnconfigure(1, weight=1)
 
-    def submit():
-        device = {k: v.get().strip() for k, v in entries.items()}
-        if "" in device.values():
-            clear_frame(frame_top)
-            tk.Label(frame_top, text="All fields are required").pack()
-            return
-        add_device_data(device)
-        clear_frame(frame_top)
-        tk.Label(frame_top, text="Device added successfully").pack()
 
-    tk.Button(frame_right, text="Submit", command=submit)\
-        .grid(row=len(DEVICE_FIELDS), column=0, columnspan=2, sticky="nsew", pady=5)
+def submit():
+    device = {}
+    for field, entry in zip(fields, entries):
+        device[field] = entry.get().strip()
+    add_device_data(device)
+
 
 # --------------------- DELETE DEVICE ---------------------
 def delete_device():
@@ -108,41 +113,48 @@ def search_device():
 
     devices = load_devices_data()
     if not devices:
-        tk.Label(frame_right, text="No devices found").pack()
+        tk.Label(frame_right, text="No devices found").grid(row=0, column=0)
         return
 
-    tk.Label(frame_right, text="Search value:").grid(row=0, column=0, sticky="e")
+    # Search input
+    tk.Label(frame_right, text="Search value:").grid(row=0, column=0, sticky="w")
     search_entry = tk.Entry(frame_right)
-    search_entry.grid(row=0, column=1, sticky="nsew")
+    search_entry.grid(row=0, column=1, sticky="ew")
+
+    frame_right.grid_columnconfigure(1, weight=1)
+
+    # Frame for results ONLY
+    result_frame = tk.Frame(frame_right)
+    result_frame.grid(row=2, column=0, columnspan=10, sticky="nsew")
 
     def search_by_key(key):
-        clear_frame(frame_right)
-        value = search_entry.get().strip()
+        clear_frame(result_frame)
 
+        value = search_entry.get().strip()
         found = False
         row = 0
+
         for device in devices:
             if device.get(key) == value:
                 found = True
                 for k, v in device.items():
-                    tk.Label(frame_right, text=f"{k}: {v}")\
-                        .grid(row=row, column=0, sticky="nsew")
+                    tk.Button(result_frame, text=f"{k}: {v}").grid(row=row, column=0, sticky="w")
                     row += 1
-                tk.Label(frame_right, text="----------------")\
-                    .grid(row=row, column=0)
+                tk.Label(result_frame, text="----------------").grid(row=row, column=0)
+                frame_right.grid_columnconfigure(row, weight=1)
                 row += 1
 
-        if not found:
-            tk.Label(frame_right, text="No matching device").pack()
 
-    col = 0
-    for key in devices[0].keys():
+        if not found:
+            tk.Label(result_frame, text="No matching device").grid(row=0, column=0)
+        
+    # Search buttons
+    for col, key in enumerate(devices[0].keys()):
         tk.Button(
             frame_right,
             text=f"by {key}",
-            command=lambda k=key: search_by_key(k)
-        ).grid(row=1, column=col, padx=2, sticky="nsew")
-        col += 1
+            command=lambda k=key: search_by_key(k)).grid(row=1, column=col, sticky="nsew")
+
 
 # ===================== MAIN MENU =====================
 def main_menu():
