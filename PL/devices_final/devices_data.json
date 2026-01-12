@@ -14,5 +14,29 @@
         "device_price": 29.99,
         "manufacturer": "BrightLights",
         "warranty period": "6 months"
+    },
+    {
+        "device_id": "device_004",
+        "device_name": "Smart Light C3",
+        "device_type": "Lighting",
+        "device_price": 29.99,
+        "manufacturer": "SensorTech",
+        "warranty period": "1 year"
+    },
+    {
+        "device_id": "device_005",
+        "device_name": "Smart Light C3",
+        "device_type": "Security",
+        "device_price": 29.99,
+        "manufacturer": "BrightLights",
+        "warranty period": "6 months"
+    },
+    {
+        "device_id": "device_006",
+        "device_name": "Smart Light C3",
+        "device_type": "Security",
+        "device_price": 29.99,
+        "manufacturer": "SensorTech",
+        "warranty period": "1 year"
     }
 ]
